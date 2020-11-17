@@ -4,12 +4,12 @@ from numpy.linalg import inv
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-5):
+def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-5, show_plot = True):
 
     y = []
     x = data
     x_f = x.flatten()
-    n = x.shape(0)
+    n = x.shape[0]
     x_avg = np.mean(data, axis= 0)
     y.append(x_avg)
     T = t_start
@@ -40,6 +40,12 @@ def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min
                 return True
         return False
 
+    def make_list(arr):
+        temp = []
+        for i in range(0, len(arr), 2):
+            temp.append(arr[i:i+2])
+        return temp
+
     while(T >= t_min):
         #update associations
         temp = np.array([[-(d(x_, y_) + gamma * sum(d(y_, _y_) for _y_ in y))/T  for y_ in y] for x_ in x])
@@ -50,28 +56,29 @@ def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min
         p_yx = p_yx / Z
 
         #Plot algorithm
-        rels = np.argmax(p_yx, axis= 1)
-        clusters = [[x[i] for i in range(n) if rels[i] == int(j)] for j in range(len(y))]
-        colors = cm.rainbow(np.linspace(0, 1, len(clusters)))
-        ctr = 0
-        for y_, cluster, color in zip(y, clusters, colors):
-            ctr += 1
-            if len(cluster) != 0:
-                cluster = np.array(cluster)
-                x_cord, y_cord = cluster[:, 0], cluster[:, 1]
-                plt.scatter(x_cord, y_cord, c=[color], edgecolors=None, s=30, alpha=0.15,
-                            label='Cluster {0}'.format(ctr))
-            y_x_cord, y_y_cord = y_[0], y_[1]
-            plt.scatter(y_x_cord, y_y_cord, marker="s", edgecolors='black', c=[color], alpha=1)
-        plt.legend()
-        plt.minorticks_on()
-        plt.grid(which='minor', linestyle=':', alpha=0.4)
-        plt.grid(which='major', linestyle='--', alpha=0.9)
-        plt.title('ECP-LL Clustering, gamma={0}, N={1}'.format(gamma, n))
-        plt.xlabel('x coordinate')
-        plt.ylabel('y coordinate')
-        plt.pause(0.3)
-        plt.clf()
+        if show_plot == True:
+            rels = np.argmax(p_yx, axis= 1)
+            clusters = [[x[i] for i in range(n) if rels[i] == int(j)] for j in range(len(y))]
+            colors = cm.rainbow(np.linspace(0, 1, len(clusters)))
+            ctr = 0
+            for y_, cluster, color in zip(y, clusters, colors):
+                ctr += 1
+                if len(cluster) != 0:
+                    cluster = np.array(cluster)
+                    x_cord, y_cord = cluster[:, 0], cluster[:, 1]
+                    plt.scatter(x_cord, y_cord, c=[color], edgecolors=None, s=30, alpha=0.15,
+                                label='Cluster {0}'.format(ctr))
+                y_x_cord, y_y_cord = y_[0], y_[1]
+                plt.scatter(y_x_cord, y_y_cord, marker="s", edgecolors='black', c=[color], alpha=1)
+            plt.legend()
+            plt.minorticks_on()
+            plt.grid(which='minor', linestyle=':', alpha=0.4)
+            plt.grid(which='major', linestyle='--', alpha=0.9)
+            plt.title('ECP-LL Clustering, gamma={0}, N={1}'.format(gamma, n))
+            plt.xlabel('x coordinate')
+            plt.ylabel('y coordinate')
+            plt.pause(0.1)
+            plt.clf()
 
         #update centroids
         p_x_temp = (np.ones(n) * (1 / n)).reshape((-1, 1))
@@ -80,7 +87,8 @@ def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min
         p_xy = p_x @ p_yx @ inv(p_y)
         p_xy_ = np.kron(p_xy, i2)
         theta = calc_theta(len(y))
-        y = inv(theta) @ p_xy_.T @ x_f
+        temp_y = inv(theta) @ p_xy_.T @ x_f
+        y = make_list(temp_y)
 
         #merge centroids
         if len(y) > 1:
@@ -88,12 +96,12 @@ def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min
             for y_ in y:
                 if len(temp) == 0:
                     temp.append(y_)
-                elif not exists(y_, temp): temp.append(y_)
+                elif not exists(y_, temp) and len(temp) < max_m: temp.append(y_)
             y = temp.copy()
 
         #perturb centroids
         if len(y) < max_m:
-            eps = np.random.random(y[0].shape)
+            eps = 1e-3 * np.random.random(y[0].shape)
             y = [y_ - eps for y_ in y] + [y_ + eps for y_ in y]
 
         T *= alpha
