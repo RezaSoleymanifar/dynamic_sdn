@@ -44,7 +44,7 @@ def rcp():
 
     y = y_0
     rcp_hist = []
-    for t in range(horizon-1):
+    for t in range(horizon):
         rcp_hist.append(y)
         x = X[t]
         phi = X[t+1] - X[t]

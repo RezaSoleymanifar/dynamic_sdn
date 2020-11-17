@@ -8,9 +8,9 @@ import matplotlib.cm as cm
 class DA:
     def __init__(self, data, max_m, gamma, t_start = None, t_min = 1e-5, alpha = 0.9, interactive = None):
         self.N, self.d = np.shape(data)
-        self.avg = np.mean(data, axis = 0)
-        self.mxm = np.max(data)
-##        self.x = self.pre_process(data)
+        # self.avg = np.mean(data, axis = 0)
+        # self.mxm = np.max(data)
+        # self.x = self.pre_process(data)
         self.x = data
         self.p_x = 1 / self.N
         self.max_m = max_m
@@ -28,6 +28,7 @@ class DA:
         self.m_hist = []
 
         self.y = []
+        #Set codebook equal to mass center of data
         self.y.append(sum(self.x[i] * self.p_x for i in range(self.N)))
         self.y_p = None
         self.y_best = self.y.copy()
@@ -47,8 +48,10 @@ class DA:
         self.ctr = 0
 
     def pre_process(self, data):
-        data_ = data.copy() 
+        data_ = data.copy()
+        #Substracts mean from all rows (data)
         data_ -= np.mean(data_, axis = 0)
+        #Squishes data between (-1, 1)
         data_ /= np.max(data_)
         return data_
 
