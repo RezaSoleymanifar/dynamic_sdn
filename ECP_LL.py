@@ -2,20 +2,28 @@ import numpy as np
 from numpy.linalg import norm
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 14})
 import matplotlib.cm as cm
 import matplotlib
 matplotlib.rcParams['font.sans-serif'] = "Times New Roman"
 # Then, "ALWAYS use sans-serif fonts"
 matplotlib.rcParams['font.family'] = "sans-serif"
 
-def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-5, show_plot = True):
+def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-3, show_plot = True, y_0 = None):
 
     y = []
     x = data
     x_f = x.flatten()
     n = x.shape[0]
     x_avg = np.mean(data, axis= 0)
-    y.append(x_avg)
+
+    #Tries to load the previous solution if available
+
+    if y_0 == None:
+        y.append(x_avg)
+    else:
+        y = y_0
+
     T = t_start
     i2 = np.eye(2)
 

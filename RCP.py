@@ -1,33 +1,28 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from numpy.linalg import norm
 from numpy.linalg import inv
 
-def rcp():
-    y_best_indices = np.load('y_hist.npy', allow_pickle = True)
+def rcp(seed = 1, spread = 0.2, k_0 = 5e-5, alpha = 0.8, gamma = 0.4):
+    Y = np.load('y_hist.npy', allow_pickle = True)
     time_series = np.load('time_series.npy', allow_pickle = True)
 
     X = time_series[0]
-    y_best_0 = X[0][y_best_indices[0]]
-    m = len(y_best_0)
-    eps = np.random.randn(3, 2)*0.2
+    y_0 = np.array(Y[0])
+    m = len(y_0)
 
-    y_0 = y_best_0 + eps
+    np.random.seed(seed)
+    eps = np.random.randn(m, 2) * spread
+    y_0 = y_0 + eps
 
     horizon = len(X)
-
-
     T = 5
-    alpha = 0.8
-    # k_0 = 1e-09
-    k_0 = 5e-5
+    alpha = alpha
+    k_0 = k_0
     n = X[0].shape[0]
-    gamma = 0.06
     eta = gamma*(m-1) + 1
     i2 = np.eye(2)
 
     theta = np.zeros((2*m, 2*m))
-
     for i in range(m):
         for j in range(m):
             i_start = i*2
@@ -40,16 +35,16 @@ def rcp():
                 theta[i_start:i_end, j_start:j_end] = np.kron(-gamma, i2)
 
     def d(x, y):
-        return np.sqrt(norm(x-y))
+        return norm(x-y) ** 2
 
     y = y_0
     rcp_hist = []
-    for t in range(horizon):
+    for t in range(horizon - 1):
         rcp_hist.append(y)
         x = X[t]
         phi = X[t+1] - X[t]
         phi_f = phi.flatten()
-        temp = np.array([[-d(x_, y_)/T  for y_ in y] for x_ in x])
+        temp = np.array([[-(d(x_, y_) + gamma * sum(d(y_, _y_) for _y_ in y)) / T for y_ in y] for x_ in x])
         c = np.max(temp, axis= 1).reshape((-1, 1))
         temp -= c
         p_yx = np.exp(temp)
@@ -80,5 +75,3 @@ def rcp():
 
     np.save('rcp_hist', rcp_hist, allow_pickle = True)
     return None
-
-rcp()

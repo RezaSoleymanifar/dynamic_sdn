@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from numpy.linalg import norm
 
 def show_sim():
-    y_indices = np.load('y_hist.npy', allow_pickle = True)
+    y = np.load('y_hist.npy', allow_pickle = True)
     time_series = np.load('time_series.npy', allow_pickle = True)
     rcp_hist = np.array(np.load('rcp_hist.npy', allow_pickle= True))
 
     t_series, labels = time_series[0], time_series[1]
-    T = len(y_indices)
+    T = len(y)
 
     data_start = t_series[0]
     data_final = t_series[-1]
@@ -21,27 +21,27 @@ def show_sim():
         plt.scatter(x, y, color = color, alpha=alpha,
                 edgecolors = edgecolors, zorder = 2, label = label)
 
-    def plot_ctrls(y_indices, t_series, labels, color, marker, alpha, label):
-        label_vals = np.unique(labels)
-        fac_ctrls = {label:[data[idx]
-                for ctrl_indices, data in zip(y_indices, t_series)
-                for idx in ctrl_indices
-                if labels[idx] == label]
-                for label in label_vals}
-        ctr = 0
-        for key in fac_ctrls:
-            path = fac_ctrls[key]
-            x = np.array(path)[:, 0]
-            y = np.array(path)[:, 1]
-            if ctr == 0:
-                plt.plot(x, y, color=color, marker = marker,
-                         alpha = alpha, label = label)
-            else:
-                plt.plot(x, y, color=color, marker = marker,
-                         alpha = alpha)
-            ctr += 1
+    # def plot_ctrls(y, t_series, labels, color, marker, alpha, label):
+    #     label_vals = np.unique(labels)
+    #     fac_ctrls = {label:[data[idx]
+    #             for ctrl_indices, data in zip(y_indices, t_series)
+    #             for idx in ctrl_indices
+    #             if labels[idx] == label]
+    #             for label in label_vals}
+    #     ctr = 0
+    #     for key in fac_ctrls:
+    #         path = fac_ctrls[key]
+    #         x = np.array(path)[:, 0]
+    #         y = np.array(path)[:, 1]
+    #         if ctr == 0:
+    #             plt.plot(x, y, color=color, marker = marker,
+    #                      alpha = alpha, label = label)
+    #         else:
+    #             plt.plot(x, y, color=color, marker = marker,
+    #                      alpha = alpha)
+    #         ctr += 1
 
-    def plot_rcp(hist):
+    def plot_paths(hist, color='orange'):
         m = hist.shape[1]
         paths = []
         for path_idx in range(m):
@@ -52,29 +52,29 @@ def show_sim():
             x = path[:, 0]
             y = path[:, 1]
             if ctr == 0:
-                plt.plot(x, y, marker = '.', c = 'orange', alpha = 0.6, label = 'RCP')
+                plt.plot(x, y, marker = '.', c = color, alpha = 0.6, label = 'RCP')
             else:
-                plt.plot(x, y, marker='.', c='orange', alpha=0.6)
+                plt.plot(x, y, marker='.', c=color, alpha=0.6)
             ctr += 1
 
 
 
-    def find_match(new_pnt, history):
-        memory = []
-        for pnt in history:
-            dist = norm(new_pnt - pnt)
-            memory.append(dist)
-        return np.argmin(memory)
+    # def find_match(new_pnt, history):
+    #     memory = []
+    #     for pnt in history:
+    #         dist = norm(new_pnt - pnt)
+    #         memory.append(dist)
+    #     return np.argmin(memory)
 
 
 
     for idx in range(T-1):
 
-        plot_rcp(rcp_hist[:idx+1, :, :])
-
-        plot_ctrls(y_indices = y_indices[0:idx+1], t_series = t_series[0:idx+1],
-                   labels = labels, color='darkorchid',
-                   marker='.', alpha = 0.6, label = 'optimal')
+        plot_paths(rcp_hist[:idx+1, :, :])
+        plot_paths(y[:idx + 1, :, :], color='purple')
+        # plot_ctrls(y_indices = y_indices[0:idx+1], t_series = t_series[0:idx+1],
+        #            labels = labels, color='darkorchid',
+        #            marker='.', alpha = 0.6, label = 'optimal')
         data = t_series[idx]
 
     ##    plt.scatter(d_x, d_y, color = 'turquoise', alpha=0.25,
@@ -90,8 +90,6 @@ def show_sim():
     ##    plt.scatter(d_final_x, d_final_y, color = 'purple',
     ##                alpha = 0.03, edgecolors = 'cyan',
     ##                zorder = 1, label = 'end')
-
-
         plot_nodes(data_final, color='purple', alpha = 0.04,
                edgecolors='cyan', zorder = 1, label='end')
 

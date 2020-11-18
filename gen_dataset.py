@@ -1,39 +1,38 @@
-# %load gen_dataset.py
 from sklearn.datasets import make_blobs
-from matplotlib import pyplot as plt 
+from matplotlib import pyplot as plt
+plt.rcParams.update({'font.size': 14})
 import numpy as np
-import sys
-from numpy.linalg import norm
 
-# n_samples, centers, random_state, T, case, shuffle = sys.argv[1:]
 def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
             T = 100, case = 'exp', bound = 1, compactness = 12,
-            variation = 1e-3, out_coeff = 1):
+            speed_var = 1e-3, out_coeff = 1):
 
+    #Origin clusters
     X, labels = make_blobs(int(n_samples), centers=int(centers),
                            n_features=2, random_state = seed1,
                            center_box = (-bound, 0), cluster_std =bound / compactness)
 
+    #Destination Clusters
     X_, labels_ = make_blobs(int(n_samples), centers=int(centers),
                              n_features=2, random_state = seed2,
-                             center_box = (0, out_coeff * bound), cluster_std =bound / compactness,
-                             shuffle = 'yes')
+                             center_box = (0, out_coeff * bound), cluster_std =bound / compactness)
 
     label_vals = np.unique(labels)
     n_labels = len(labels)
     n, d = np.shape(X)
     K = np.zeros((n,d))
 
-    ##K = 0.015 * np.random.rayleigh(0.5, size = (n,d)) + 0.015
+    #Generating stochastic dynamics parameters
+    # K = 0.015 * np.random.rayleigh(0.5, size = (n,d)) + 0.015
     for label in label_vals:
         indices = np.array(np.argwhere(labels == label)).flatten()
         size = len(indices)
         # K1 = 0.015 * np.random.rayleigh(0.5, size = (size,1)) + 0.015
         np.random.seed(seed1)
-        K1 = variation * np.random.rayleigh(0.5, size=(size, 1)) + 0.015
+        K1 = speed_var * np.random.rayleigh(0.5, size=(size, 1)) + 0.015
         # K2 = 2 * np.random.uniform(0.85, 1) * K1
         np.random.seed(seed2)
-        K2 = 2 * np.random.uniform(0.85, 1) * K1
+        K2 = 2 * np.random.uniform(0.7, 1) * K1
         K_ = np.concatenate((K1, K2), axis = 1)
         temp = K_.T.copy()
         np.random.shuffle(temp)
@@ -73,6 +72,11 @@ def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
         x_t = ((x_1 - x_0) / T) * t + x_0
         return x_t
 
+    if case == 'lin':
+        calc_func = lin_func
+    elif case == 'exp':
+        calc_func = exp_func
+
     def loc_func(t, idx):
         result = calc_func(t, X[idx], X_[idx], K[idx], T)
         return result
@@ -97,11 +101,6 @@ def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
             X_new[idx, :] = loc_func(t, idx)
         return X_new
 
-    if case == 'lin':
-        calc_func = lin_func
-    elif case == 'exp':
-        calc_func = exp_func
-
     for t in range(0, T):
         X_new = move(t)
         history.append(X_new)
@@ -110,9 +109,8 @@ def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
         plt.clf()
 
     #Save simulation info
-    info = {'seed1':seed1, 'seed':seed2, 'n_samples':n_samples, 'centers':centers,
-            'T':T, 'case':case, 'bound':bound, 'compactness':compactness,
-            'variation':variation, 'out_coeff':out_coeff}
+    info = [seed1, seed2, n_samples, centers, T, case, bound, compactness,
+            speed_var, out_coeff]
     np.save('info', info, allow_pickle=True)
 
     return None
