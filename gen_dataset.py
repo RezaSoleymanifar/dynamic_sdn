@@ -6,16 +6,17 @@ import sys
 from numpy.linalg import norm
 
 # n_samples, centers, random_state, T, case, shuffle = sys.argv[1:]
-def run_sim(seed1=20, seed2=22):
-    n_samples, centers, T, case =  300, 3, 100, 'exp'
+def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
+            T = 100, case = 'exp', bound = 1, compactness = 12,
+            variation = 1e-3, out_coeff = 1):
 
     X, labels = make_blobs(int(n_samples), centers=int(centers),
                            n_features=2, random_state = seed1,
-                           center_box = (-0.7, 0.35), cluster_std = 0.07)
+                           center_box = (-bound, 0), cluster_std =bound / compactness)
 
     X_, labels_ = make_blobs(int(n_samples), centers=int(centers),
                              n_features=2, random_state = seed2,
-                             center_box = (-0.35, 0.7), cluster_std = 0.07,
+                             center_box = (0, out_coeff * bound), cluster_std =bound / compactness,
                              shuffle = 'yes')
 
     label_vals = np.unique(labels)
@@ -27,8 +28,11 @@ def run_sim(seed1=20, seed2=22):
     for label in label_vals:
         indices = np.array(np.argwhere(labels == label)).flatten()
         size = len(indices)
-        K1 = 0.015 * np.random.rayleigh(0.5, size = (size,1)) + 0.015
-    ##    K2 = 0.03 * np.random.rayleigh(0.5, size = (size,1)) + 0.01
+        # K1 = 0.015 * np.random.rayleigh(0.5, size = (size,1)) + 0.015
+        np.random.seed(seed1)
+        K1 = variation * np.random.rayleigh(0.5, size=(size, 1)) + 0.015
+        # K2 = 2 * np.random.uniform(0.85, 1) * K1
+        np.random.seed(seed2)
         K2 = 2 * np.random.uniform(0.85, 1) * K1
         K_ = np.concatenate((K1, K2), axis = 1)
         temp = K_.T.copy()
@@ -85,7 +89,7 @@ def run_sim(seed1=20, seed2=22):
         plt.minorticks_on()
         plt.grid(b=True, which='major', color='black', linestyle='--', alpha = 0.15)
         plt.grid(b=True, which='minor', color='black', linestyle='-', alpha = 0.01)
-        plt.pause(0.3)
+        plt.pause(1e-3)
 
     def move(t):
         X_new = np.zeros((n, d))
@@ -104,4 +108,11 @@ def run_sim(seed1=20, seed2=22):
         np.save('time_series', [history, labels, K], allow_pickle = True)
         plot_system(X_new, t, T)
         plt.clf()
+
+    #Save simulation info
+    info = {'seed1':seed1, 'seed':seed2, 'n_samples':n_samples, 'centers':centers,
+            'T':T, 'case':case, 'bound':bound, 'compactness':compactness,
+            'variation':variation, 'out_coeff':out_coeff}
+    np.save('info', info, allow_pickle=True)
+
     return None

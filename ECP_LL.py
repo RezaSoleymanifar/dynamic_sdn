@@ -3,6 +3,10 @@ from numpy.linalg import norm
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = "Times New Roman"
+# Then, "ALWAYS use sans-serif fonts"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-5, show_plot = True):
 
@@ -77,7 +81,7 @@ def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min
             plt.title('ECP-LL Clustering, gamma={0}, N={1}'.format(gamma, n))
             plt.xlabel('x coordinate')
             plt.ylabel('y coordinate')
-            plt.pause(0.1)
+            plt.pause(1e-5)
             plt.clf()
 
         #update centroids
