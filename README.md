@@ -1,5 +1,5 @@
 # dynamic_sdn
-A Temporal Clustering Algorithm for Software Defined Networks 
+Python implementation of "A Temporal Clustering Algorithm for Software Defined Networks" paper.
 
 [![IMAGE ALT TEXT](assets/thumbnail.PNG)](https://www.youtube.com/watch?v=YreyvYL-nlQ&list=PLkmxIANUXsFA2OCG7Uce1vBXYCqvvHSA3&index=1 "DCP for Mobile SDN's")
 
