@@ -2,13 +2,13 @@ import numpy as np
 from numpy.linalg import norm
 from numpy.linalg import inv
 
-def rcp(seed = 1, spread = 0.2, k_0 = 5e-5, alpha = 0.8, gamma = 0.4):
+def rcp(seed = 5, spread = 0.2, k_0 = 5e-5, alpha = 0.8, gamma = 0.4):
     Y = np.load('y_hist.npy', allow_pickle = True)
     time_series = np.load('time_series.npy', allow_pickle = True)
 
     X = time_series[0]
     y_0 = np.array(Y[0])
-    m = len(y_0)
+    m = len(Y[-1])
 
     np.random.seed(seed)
     eps = np.random.randn(m, 2) * spread
@@ -74,4 +74,4 @@ def rcp(seed = 1, spread = 0.2, k_0 = 5e-5, alpha = 0.8, gamma = 0.4):
         T *= alpha
 
     np.save('rcp_hist', rcp_hist, allow_pickle = True)
-    return None
+    return rcp_hist
