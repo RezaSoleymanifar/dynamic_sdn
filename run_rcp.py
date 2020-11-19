@@ -1,4 +1,7 @@
 from RCP import rcp
-from end_to_end import gamma
+from plot_sims import show_sim
 
-rcp(seed = 1, spread = 1, k_0 = 1e-4, alpha= 0.6, gamma = gamma)
+alpha = 0.7
+k_0 = 2e-4
+rcp(seed = 2, spread = 0.3, k_0 = k_0, alpha= alpha, gamma = 0.1)
+show_sim('K_0 = {0}'.format(k_0), 'slateblue', 'peru')

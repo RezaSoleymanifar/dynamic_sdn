@@ -1,13 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
 from numpy.linalg import inv
-import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 14})
+from gen_dataset import plt
 import matplotlib.cm as cm
-import matplotlib
-matplotlib.rcParams['font.sans-serif'] = "Times New Roman"
-# Then, "ALWAYS use sans-serif fonts"
-matplotlib.rcParams['font.family'] = "sans-serif"
 
 def ecp_ll(data = None, gamma = 0.01, max_m = 3, alpha = 0.9, t_start = 2, t_min = 1e-3, show_plot = True, y_0 = None):
 

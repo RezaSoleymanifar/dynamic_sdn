@@ -1,11 +1,15 @@
 from sklearn.datasets import make_blobs
 from matplotlib import pyplot as plt
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 16})
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = "Times New Roman"
+matplotlib.rcParams['font.family'] = "sans-serif"
 import numpy as np
 
 def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
             T = 100, case = 'exp', bound = 1, compactness = 12,
-            speed_var = 1e-3, out_coeff = 1):
+            speed_var = 1e-3, out_coeff = 1, delta_1 = 0, delta_2 = 0):
+
 
     #Origin clusters
     X, labels = make_blobs(int(n_samples), centers=int(centers),
@@ -15,7 +19,7 @@ def run_sim(seed1=20, seed2=22, n_samples = 300, centers = 3,
     #Destination Clusters
     X_, labels_ = make_blobs(int(n_samples), centers=int(centers),
                              n_features=2, random_state = seed2,
-                             center_box = (0, out_coeff * bound), cluster_std =bound / compactness)
+                             center_box = (0 + delta_1, out_coeff * bound + delta_2), cluster_std =bound / compactness)
 
     label_vals = np.unique(labels)
     n_labels = len(labels)
